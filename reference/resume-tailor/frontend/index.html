@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Tailor — Recruiter-Ready Bullets in Seconds</title>
+  <meta name="description" content="Turn raw resume bullets and job requirements into high-impact, tailored bullet points using Gemini AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">✨</div>
+        <div class="brand-text">
+          <h1 class="brand-title">Resume Tailor</h1>
+          <p class="brand-subtitle">Turn raw bullets & job requirements into recruiter-ready achievements in seconds.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="sample-btn" class="btn btn-secondary" title="Load sample resume & job description">
+          <span class="btn-icon">💡</span>
+          <span>Try Sample</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error/Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden" role="alert" aria-live="assertive">
+      <span class="alert-icon">⚠️</span>
+      <span id="alert-message" class="alert-message"></span>
+      <button id="alert-close" class="alert-close" aria-label="Dismiss alert">&times;</button>
+    </div>
+
+    <!-- Main Workspace Form -->
+    <main class="workspace">
+      <!-- Dual Input Grid -->
+      <section class="inputs-grid">
+        <!-- Resume Input Card -->
+        <div class="card input-card">
+          <div class="card-header">
+            <div class="card-label">
+              <span class="step-num">1</span>
+              <h2>Your Current Resume / Bullets</h2>
+            </div>
+            <div class="card-meta">
+              <span id="resume-count" class="char-count">0 / 10,000</span>
+              <button id="resume-clear" class="btn-text" title="Clear text">Clear</button>
+            </div>
+          </div>
+          <textarea
+            id="resume-input"
+            class="textarea"
+            placeholder="Paste your current resume bullets, raw accomplishments, or project notes here...&#10;&#10;e.g.,&#10;• Built backend APIs using Python.&#10;• Made database queries faster.&#10;• Worked on payment integration."
+            maxlength="10000"
+            rows="9"
+          ></textarea>
+        </div>
+
+        <!-- Job Description Input Card -->
+        <div class="card input-card">
+          <div class="card-header">
+            <div class="card-label">
+              <span class="step-num">2</span>
+              <h2>Target Job Posting</h2>
+            </div>
+            <div class="card-meta">
+              <span id="job-count" class="char-count">0 / 10,000</span>
+              <button id="job-clear" class="btn-text" title="Clear text">Clear</button>
+            </div>
+          </div>
+          <textarea
+            id="job-input"
+            class="textarea"
+            placeholder="Paste the target job description, responsibilities, or requirements here...&#10;&#10;e.g.,&#10;We're looking for a Senior Backend Engineer proficient in Python, FastAPI, and PostgreSQL with experience designing high-throughput distributed systems."
+            maxlength="10000"
+            rows="9"
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <button id="tailor-btn" class="btn btn-primary" type="button">
+          <span class="btn-spinner hidden" id="tailor-spinner"></span>
+          <span class="btn-icon" id="tailor-icon">⚡</span>
+          <span id="tailor-btn-text">Tailor Bullets ✨</span>
+        </button>
+        <span class="keyboard-hint"><kbd>Cmd</kbd> + <kbd>Enter</kbd> to run</span>
+      </div>
+
+      <!-- Results Stage -->
+      <section class="results-section">
+        <div class="results-header">
+          <div class="results-title-group">
+            <h2 class="results-title">Tailored Resume Bullets</h2>
+            <span id="results-count-badge" class="count-badge hidden">0 Bullets</span>
+          </div>
+          <button id="copy-all-btn" class="btn btn-secondary hidden">
+            <span class="copy-icon">📋</span>
+            <span class="copy-text">Copy All</span>
+          </button>
+        </div>
+
+        <!-- Summary Insight -->
+        <div id="summary-insight" class="summary-insight hidden">
+          <span class="insight-icon">🎯</span>
+          <span id="insight-text"></span>
+        </div>
+
+        <!-- Results Cards Container -->
+        <div id="results-container" class="results-container" aria-live="polite">
+          <!-- Initial Empty State -->
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>Ready to optimize your bullets</h3>
+            <p>Paste your existing bullets and the target job description above, then click <strong>Tailor Bullets ✨</strong>.</p>
+          </div>
+
+          <!-- Skeleton Loader (Hidden by default) -->
+          <div id="skeleton-loader" class="skeleton-loader hidden">
+            <div class="skeleton-card">
+              <div class="skeleton-line full"></div>
+              <div class="skeleton-line half"></div>
+              <div class="skeleton-tags">
+                <div class="skeleton-tag"></div>
+                <div class="skeleton-tag"></div>
+              </div>
+            </div>
+            <div class="skeleton-card">
+              <div class="skeleton-line full"></div>
+              <div class="skeleton-line half"></div>
+              <div class="skeleton-tags">
+                <div class="skeleton-tag"></div>
+                <div class="skeleton-tag"></div>
+              </div>
+            </div>
+            <div class="skeleton-card">
+              <div class="skeleton-line full"></div>
+              <div class="skeleton-line half"></div>
+              <div class="skeleton-tags">
+                <div class="skeleton-tag"></div>
+                <div class="skeleton-tag"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Built with Google Gemini & FastAPI • Text-only private processing</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

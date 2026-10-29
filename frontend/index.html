@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentor AI</title>
+  <meta name="description" content="A multimodal AI agent that finds jobs that fit your resume and runs voice mock interviews." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 30 16 16 30 2 16Z' fill='%233b5bdb'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◆</span>
+      <div>
+        <h1>Mentor AI</h1>
+        <p>Find jobs that fit your resume. Practice the interview out loud.</p>
+      </div>
+    </div>
+    <!-- The agent rail: one chip per agent — locked, active, or working right now. -->
+    <nav class="agent-rail" id="agent-rail" aria-label="Agents"></nav>
+  </header>
+
+  <section class="resume-bar" id="resume-bar" aria-live="polite"></section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="search" aria-selected="true">1 · Find Jobs</button>
+    <button class="tab" role="tab" data-tab="saved" aria-selected="false">2 · Saved Jobs <span class="count" id="saved-count"></span></button>
+    <button class="tab" role="tab" data-tab="prep" aria-selected="false">3 · Interview Prep</button>
+  </div>
+
+  <div id="alert" class="alert hidden" role="alert"></div>
+
+  <main>
+    <!-- Flow 1: chat with the Summary Agent, then the Web Search Agent finds posts -->
+    <section class="panel" id="panel-search" role="tabpanel">
+      <div class="chat" id="search-chat" aria-live="polite"></div>
+      <div id="search-status"></div>
+      <div id="search-results"></div>
+      <form class="composer" id="search-form">
+        <textarea id="search-input" rows="2" placeholder="What kind of job are you looking for? Role, level, location…"></textarea>
+        <div class="composer-actions">
+          <button type="button" class="ghost" id="sample-request">Try sample request</button>
+          <button type="button" class="ghost" id="new-search">New search</button>
+          <button type="submit" class="primary" id="search-send">Send</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Flow 2 entry: the jobs you saved -->
+    <section class="panel hidden" id="panel-saved" role="tabpanel">
+      <div id="saved-list" class="job-grid"></div>
+    </section>
+
+    <!-- Flow 2: topics → study plan → mock interview → review, for one saved job -->
+    <section class="panel hidden" id="panel-prep" role="tabpanel">
+      <div id="prep"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Mentor AI · GDG Brooklyn Coding Jam · Your resume stays on this computer and is sent only to the Gemini API.
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
