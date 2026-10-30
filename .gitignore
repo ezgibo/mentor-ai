@@ -25,3 +25,35 @@ Thumbs.db
 
 # Claude Code local session files
 .claude/
+
+# Additional secret files (keep sanitized examples)
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+*service-account*.json
+*service_account*.json
+.secrets/
+
+# Private database copies, uploads, and exports
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+uploads/
+exports/
+recordings/
+
+# Tool caches and temporary output
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
+*.tmp
+*.bak
+._*

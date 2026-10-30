@@ -1,0 +1,1 @@
+AI job discovery and interview preparation with FastAPI, Gemini, SQLite, and live or turn-by-turn voice practice.

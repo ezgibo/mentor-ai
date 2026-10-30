@@ -1,164 +1,109 @@
-# ◆ Mentor AI — GDG Brooklyn Coding Jam
+# Mentor AI
 
-**A multimodal AI agent for job searching and mock interviewing.** Mentor AI reads your resume, finds live job posts
-that fit you, builds a study plan for the one you pick, interviews you **out loud** as a senior employee of that
-company, and grades every answer.
+Mentor AI is a local web application for job discovery and interview preparation. It brings resume context, job research, study planning, spoken practice, and answer feedback into one workflow. A FastAPI backend coordinates four specialized Gemini agents, while a browser interface handles chat, saved jobs, preparation tasks, and audio interviews.
 
-In this Coding Jam you build it **one agent at a time**. The app is already wired up; each agent ships with an empty
-prompt. For each agent you learn what it does and how it talks to the others, then paste its prompt into one marked
-line of code — and watch that part of the app come alive.
+## Key features
 
----
+- Upload a resume as PDF, PNG, JPG, JPEG, or TXT, or use the included fictional sample.
+- Confirm role, level, and location preferences before starting a job search.
+- Search public job postings with Google Search grounding, rank matches, refine results with feedback, and save selected jobs.
+- Identify preparation topics, record self-assessments, and create a study plan for a saved job.
+- Research publicly reported interview questions and prepare a job-specific mock interview.
+- Practice through the Gemini Live API or a turn-by-turn voice fallback.
+- Review answers using accuracy, depth, structure, and communication scores, with strengths and suggested improvements.
+- Store profiles, saved jobs, preparation progress, interview transcripts, and reviews in local SQLite storage.
 
-## What you'll build
+Search results, study content, and interview feedback depend on model responses and available sources. These features do not establish job suitability, guarantee current openings, or predict hiring outcomes.
 
-```
-                         ┌──────────────────────────────┐
-     You ◀──── chat ────▶│   🧭 Summary Agent (Mentor)  │  the only agent that talks to you
-     (resume PDF, text)  └──────────────┬───────────────┘
-                     confirmed request  │  ▲  results to explain
-                                        ▼  │
-                         ┌──────────────────────────────┐
-                         │   🔎 Web Search Agent         │  live Google Search, in the background
-                         └──────────────────────────────┘
-                     7 interview questions │
-                                        ▼
-     You ◀──── voice ───▶┌──────────────────────────────┐
-                         │   🎙️ Mock Interview Agent    │  Gemini Live API: real-time voice
-                         └──────────────┬───────────────┘
-                     question + transcript pairs
-                                        ▼
-                         ┌──────────────────────────────┐
-                         │   📝 Review Agent            │  rubric scores, in the background
-                         └──────────────────────────────┘  → back to Mentor → you
-```
+## Technical approach
 
-The agents never call each other directly: `backend/orchestrator.py` moves each flow to its next status and hands one
-agent's output to the next. The Summary Agent answers while you wait; the others work in the background while you keep
-using the app.
+The Summary Agent handles user-facing conversation and explains results. The Web Search Agent gathers job postings and interview reports. The Mock Interview Agent conducts spoken practice, and the Review Agent evaluates answer transcripts.
 
-## Features (the prototype)
+`backend/orchestrator.py` coordinates state transitions and background work rather than having agents call each other directly. Pydantic models define structured payloads. FastAPI provides REST endpoints, serves the static frontend, and relays live interview audio over WebSocket. SQLite stores application state.
 
-**1 · Find Jobs**
-- Upload your resume (PDF, PNG, JPG, or TXT) — Gemini reads the file directly — or click **Use sample resume**.
-- Tell Mentor what you want (role, level, location). It restates it and asks *"Did I get this right?"* until you
-  press **Yes, search**.
-- The Web Search Agent finds the **5 most relevant posts from the past 3 months** (LinkedIn and Handshake first),
-  and Mentor explains why each one fits your resume.
-- Not happy? Give feedback and it searches again. Happy? Tick and **save** the posts you like.
+The four agent prompts are already populated in this checkout.
 
-**2 · Saved Jobs** — every saved post with its study and interview status.
+## Technologies
 
-**3 · Interview Prep** (for one saved job)
-- **Know the topics:** Mentor lists what the job expects you to know; you rate yourself 1–5 on each.
-- **Study plan:** what to study first vs. review later, with a checkbox per topic. Press **I'm done studying**.
-- **Interview research:** the Web Search Agent looks for questions real candidates reported for that company.
-- **Mock interview:** Mentor writes **7 questions** (reported + job description + deep-dives on your resume); the
-  Mock Interview Agent asks them out loud and transcribes your answers. Live conversation or turn-by-turn.
-- **Review:** each answer scored 1–10 on a 4-part rubric, with strengths, what to prepare, and what a senior
-  interviewer listens for — plus Mentor's *prepare next* list.
+| Area | Technologies |
+| --- | --- |
+| Backend | Python 3.11+, FastAPI, Uvicorn, Pydantic |
+| AI | Google Gen AI SDK, Gemini, Google Search grounding, Gemini Live API |
+| Voice | Live audio, text-to-speech, transcription, Web Audio API, WebSocket |
+| Storage | SQLite |
+| Frontend | HTML, CSS, JavaScript |
+| Dependencies and tests | uv, pytest, pytest-asyncio |
 
-Everything is stored in a local SQLite file (`data/mentor.db`). No accounts, no cloud database.
+## Installation
 
-## The four agents
-
-| Step | Agent | What it does | Runs | Paste into | Guide |
-|---|---|---|---|---|---|
-| 1 | 🧭 **Summary** | Talks to you; confirms your request; explains results; writes the study plan and the interview; presents the review | Foreground | `backend/agents/summary.py` | [agents/summary_agent.md](agents/summary_agent.md) |
-| 2 | 🔎 **Web Search** | Finds job posts and reported interview questions on the live web | Background | `backend/agents/web_search.py` | [agents/web_search_agent.md](agents/web_search_agent.md) |
-| 3 | 🎙️ **Mock Interview** | Interviews you by voice as a senior employee; transcribes your answers | Live | `backend/agents/mock_interview.py` | [agents/mock_interview_agent.md](agents/mock_interview_agent.md) |
-| 4 | 📝 **Review** | Grades each answer with a rubric and comments like a senior interviewer | Background | `backend/agents/review.py` | [agents/review_agent.md](agents/review_agent.md) |
-
-## Before the session (5 minutes)
-
-1. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
-2. Get a Gemini API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and make sure the project
-   has quota/credits (the Live API voice interview uses the most).
-3. Bring **headphones** — the interviewer must not hear itself through your speakers.
-4. Use Chrome, Edge, Safari, or Firefox and allow microphone access when asked.
-
-## Run it
+Requirements: Python 3.11 or later, `uv`, and access to the configured Gemini models with sufficient quota. Voice interviews require a microphone and browser audio permissions.
 
 ```bash
+git clone https://github.com/ezgibo/mentor-ai.git
+cd mentor-ai
 uv sync --extra dev
-cp .env.example .env            # then put your key in GEMINI_API_KEY
+cp .env.example .env
+```
+
+Set `GEMINI_API_KEY` in your local `.env` file. Keep this file out of Git. Review `.env.example` for model, voice, and storage configuration. Model identifiers are configurable; confirm their availability in your own account before using the application.
+
+Start the server:
+
+```bash
 uv run uvicorn main:app --app-dir backend --reload
 ```
 
-Open **http://localhost:8000**. All four agent chips in the header are grey and locked — that's expected.
+Open `http://localhost:8000`. `run.sh` provides the same local startup workflow. On macOS, `Başlat.command` also opens the browser.
 
-## Build it: one agent at a time
+## Usage
 
-For each step:
-1. Open the agent's guide in `agents/` (or follow the slide).
-2. Copy the prompt from **The prompt** section.
-3. Paste it between the triple quotes of `SYSTEM_PROMPT` in the matching `backend/agents/*.py` file and save.
-4. The server reloads; within a few seconds the agent's chip turns green and its features unlock.
+1. Upload a resume or select the fictional sample.
+2. Describe the jobs you want and confirm the application's interpretation.
+3. Review search results, provide feedback if needed, and save relevant postings.
+4. Open a saved job, review its preparation topics, rate your familiarity, and work through the study plan.
+5. Start a mock interview. Use headphones for live audio or select turn-by-turn mode through `VOICE_MODE=turn` in `.env` and restart the server.
+6. Review the transcript-based scores and preparation suggestions after the interview.
 
-```python
-SYSTEM_PROMPT = """
-← paste the prompt here
-"""
-```
-
-Fell behind? `uv run python scripts/catch_up.py <summary|web_search|mock_interview|review|all>` pastes it for you.
+The default interview length is seven questions, configurable from five to ten. Uploaded resumes are limited to 10 MB.
 
 ## Project structure
 
-```
-mentor_AI/
-├── README.md  BRIEF.md  product.md  ui.md  engineering.md  db.md
-├── agents/                       # one guide per agent — includes the prompt to paste
-├── backend/
-│   ├── main.py                   # FastAPI routes + WebSocket + static frontend
-│   ├── orchestrator.py           # status transitions; starts background agents
-│   ├── agents/                   # summary.py · web_search.py · mock_interview.py · review.py  ← paste slots
-│   ├── voice/                    # live_proxy.py (Live API relay) · turn_based.py (fallback)
-│   ├── db.py  models.py  gemini.py  context.py  config.py
-├── frontend/                     # index.html · style.css · app.js · audio.js (no build step)
-├── samples/sample_resume.pdf     # fictional resume for following along
-├── scripts/                      # catch_up.py · make_sample_resume.py
-├── tests/                        # pytest, Gemini mocked
-├── reference/resume-tailor/      # the previous Coding Jam app: same stack, pattern reference
-└── .agent/skills/                # agent skills: gemini-api-dev, gemini-live-api-dev, design docs, TDD
+```text
+backend/                 API, orchestration, agents, models, and database access
+backend/voice/           Live interview relay and turn-by-turn audio
+frontend/                Browser interface and audio handling
+agents/                  Agent guides and prompt references
+samples/                 Fictional sample resume
+scripts/                 Local setup and workshop utility scripts
+tests/                   Application tests
+reference/resume-tailor/ Related workshop reference application
+.agent/skills/           Bundled development guidance and third-party notices
 ```
 
-## Tech stack
+Product, engineering, database, and interface notes remain in the repository. Workshop utility scripts can fill or reset agent prompts; resetting them disables the corresponding features.
 
-| Layer | Technology |
-|---|---|
-| Backend | Python 3.11+, FastAPI, Uvicorn, `uv` |
-| AI | `google-genai` SDK — `gemini-2.5-flash` (+ Google Search), `gemini-2.5-flash-native-audio-preview-12-2025` (Live API), `gemini-2.5-flash-preview-tts` |
-| Storage | SQLite (Python `sqlite3`) |
-| Frontend | Vanilla HTML / CSS / JS, Web Audio API (AudioWorklet), WebSocket |
-| Tests | pytest, pytest-asyncio |
+## Validation
 
-All settings (models, question count, voice mode) are in `.env.example`.
+Run the existing test suite with:
 
-## Organizer checklist
+```bash
+uv run pytest -q
+```
 
-- [ ] `uv run pytest` passes.
-- [ ] `uv run python scripts/catch_up.py all`, then run both flows end to end with a real key: search → save →
-      topics → plan → study done → **live** interview (with headphones) → review. Repeat once in **turn by turn**.
-- [ ] `uv run python scripts/catch_up.py all --reset` before publishing — the starter must ship with empty prompts
-      (`tests/test_agents.py` checks this).
-- [ ] Confirm the default models are still available for the event date (`GEMINI_*` in `.env.example`).
+During portfolio preparation, the local suite returned **74 passed and 7 failed**. The seven failures assert the original starter's empty-prompt or locked-agent behavior, including prompt-reset comparisons. This checkout has populated prompts, so those expectations differ from its current state. Application code and tests were preserved.
 
-## Privacy
+This result does not verify live Gemini calls, current search quality, microphone behavior, or a complete interview session. No end-to-end success or performance benchmark is claimed.
 
-Your resume and interview answers stay in `data/` on your computer (git-ignored) and are sent only to the Gemini API.
-Free-tier and paid-tier Gemini API data handling differ — see Google's Gemini API terms.
+## Data and privacy
 
-## Troubleshooting
+The default `data/` directory contains the SQLite database and uploaded resumes. It is excluded from version control, along with environment files, caches, logs, and local runtime artifacts. If `MENTOR_DATA_DIR` points elsewhere, keep that directory outside Git as well.
 
-| Problem | Fix |
-|---|---|
-| Chip says **Fix the paste** | You copied the whole guide page. Paste only the text inside the prompt box (between the ``` lines) |
-| Job search finds nothing | Check the server log for `finish reason`; wait a minute and retry, or try a different role title/location |
-| Chip stays grey after pasting | Save the file; the prompt must be between the `"""` quotes; check the server log for a syntax error |
-| "API key is missing or invalid" | Put `GEMINI_API_KEY` in `.env` and restart the server |
-| "no credits left" / rate limit | Check billing/quota at [ai.studio/projects](https://ai.studio/projects); wait a minute |
-| Job has no description | Open the post and paste the description into the job's prep page |
-| Interviewer keeps interrupting itself | Use headphones, or switch to **Turn by turn** |
-| Live interview won't connect | Switch to **Turn by turn**; check `GEMINI_LIVE_MODEL` is available to your key |
-| Start over | Stop the server and delete `data/` |
+Resume content, conversation context, and interview audio or transcripts are processed by the configured AI services when those features run. Local storage does not mean offline processing. The included sample resume is explicitly fictional.
+
+The application has no account system and is intended for local use. Review deployment and access controls before making a server reachable by others.
+
+## Source and licensing
+
+This repository retains the Git history of the [Mentor AI Coding Jam starter](https://github.com/harrisonahn1129/Mentor_AI), along with its workshop materials, reference application, and bundled third-party notices. The existing source remote is preserved.
+
+The bundled Gemini skills include an [Apache 2.0 license](.agent/skills/gemini-skills/LICENSE). That license applies to the corresponding bundled material. No root project license was present, and this repository does not assign a new license to the application or claim exclusive authorship.
